@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Exemplo API WordPress com Imagem Destacada</title>
+</head>
+<body>
+  <div id="posts"></div>
+
+  <script>
+    const siteurl = 'https://hml-decorlumenblog.seodev.ambienteseo.com.br/';
+
+    // Função para obter e exibir os posts com imagem destacada
+    function getPosts() {
+
+      const urlAPI = siteurl + 'wp-json/wp/v2/'; 
+      
+      function getUrlMethod(text){
+        if (text == "img"){
+
+          return urlAPI + "media/";
+          
+        }else if (text == "post"){
+          return urlAPI + "posts/";
+        }
+        
+      }
+    
+      fetch(getUrlMethod("post") )
+        .then(response => response.json())
+        .then(posts => {
+          const postsContainer = document.getElementById('posts');
+
+          // Percorre os posts e cria elementos para exibir na tela
+          posts.forEach(post => {
+            const postElement = document.createElement('div');
+
+            // Obtém a URL da imagem destacada
+            const featuredMediaId = post.featured_media;
+            
+            fetch(getUrlMethod("img")  + featuredMediaId)
+              .then(response => response.json())
+              .then(media => {
+                const imageUrl = media.source_url;
+
+                // Cria o elemento de imagem para a imagem destacada
+                const imageElement = document.createElement('img');
+                imageElement.src = imageUrl;
+                imageElement.alt = post.title.rendered;
+                postElement.appendChild(imageElement);
+              });
+
+            // Cria os elementos para exibir o título e o conteúdo do post
+            postElement.innerHTML += `<h2>${post.title.rendered}</h2>
+                                       <p>${post.excerpt.rendered}</p>
+                                       <hr>`;
+            postsContainer.appendChild(postElement);
+          });
+        })
+        .catch(error => console.error('Erro ao obter os posts:', error));
+    }
+
+    // Chama a função para obter e exibir os posts com imagem destacada quando a página carregar
+    window.onload = getPosts;
+  </script>
+</body>
+</html>
